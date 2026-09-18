@@ -480,10 +480,7 @@
 
   // ---------- OAUTH ----------
   async function startAuthFlow() {
-    if (REDIRECT_URI === 'https://di4b1e.github.io/spotify-viz/music.html') {
-      showToast('Set REDIRECT_URI in the code first!', 'error');
-      return;
-    }
+    
     const codeVerifier = generateRandomString(64);
     localStorage.setItem('spotify_code_verifier', codeVerifier);
     const codeChallenge = await generateCodeChallenge(codeVerifier);
