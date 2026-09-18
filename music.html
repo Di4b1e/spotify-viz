@@ -318,18 +318,11 @@
 <script>
 (function() {
   // ============================================================
-  // ⚠️ STEP 1: PASTE YOUR CLIENT ID BELOW
+  // CONFIG
   // ============================================================
   const CLIENT_ID = 'de46b1d0e36443488e051dcbe872f9b4';
-
-  // ============================================================
-  // ⚠️ STEP 2: PASTE YOUR HOSTED URL BELOW (must match Spotify dashboard exactly)
-  // Example: 'https://yourname.github.io/spotify-viz/music.html'
-  // Example: 'https://random-name.netlify.app/music.html'
-  // ============================================================
   const REDIRECT_URI = 'https://di4b1e.github.io/spotify-viz/music.html';
 
-  // Scopes for Web Playback SDK
   const SCOPES = [
     'streaming',
     'user-read-email',
@@ -480,7 +473,6 @@
 
   // ---------- OAUTH ----------
   async function startAuthFlow() {
-    
     const codeVerifier = generateRandomString(64);
     localStorage.setItem('spotify_code_verifier', codeVerifier);
     const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -600,7 +592,7 @@
     authRow.classList.add('hidden');
     logoutLink.classList.remove('hidden');
 
-    if (player) return; // already initialized
+    if (player) return;
 
     player = new Spotify.Player({
       name: 'Spotify PFP Visualizer',
@@ -658,9 +650,6 @@
     player.addListener('authentication_error', ({ message }) => {
       setStatus('error', message);
       showToast('Auth error: ' + message, 'error');
-      if (message.toLowerCase().includes('premium') || message.toLowerCase().includes('scope')) {
-        authRow.classList.remove('hidden');
-      }
     });
     player.addListener('account_error', ({ message }) => {
       setStatus('error', 'Premium required');
@@ -723,7 +712,6 @@
     return m + ':' + (sec < 10 ? '0' : '') + sec;
   }
 
-  // Poll position every second while playing (SDK doesn't auto-update)
   setInterval(() => {
     if (player && isPlaying) {
       player.getCurrentState().then(state => {
@@ -814,7 +802,6 @@
       ctx.shadowBlur = 0;
       ctx.shadowColor = 'transparent';
 
-      // Reflection
       ctx.globalAlpha = 0.15;
       for (let i = 0; i < barCount; i += 2) {
         let value;
@@ -835,7 +822,6 @@
       }
       ctx.globalAlpha = 1;
 
-      // Baseline
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(124,92,255,.35)';
       ctx.lineWidth = 2;
@@ -852,17 +838,13 @@
   async function boot() {
     loginBtn.addEventListener('click', startAuthFlow);
 
-    // Handle OAuth callback first
     const loggedIn = await handleAuthCallback();
 
     if (loggedIn) {
-      // Wait for SDK to load, then init
       if (window.Spotify && window.Spotify.Player) {
         setTimeout(tryInitPlayer, 300);
       }
-      // else onSpotifyWebPlaybackSDKReady will fire
     } else {
-      // Existing session?
       const token = await getValidToken();
       if (token) {
         authRow.classList.add('hidden');
@@ -877,13 +859,11 @@
       }
     }
 
-    // Always start visualizer animation
     if (!animationFrame) startVisualizer();
   }
 
   boot();
 
-  // Safety: re-init player if SDK loads after boot
   const existingReady = window.onSpotifyWebPlaybackSDKReady;
   window.onSpotifyWebPlaybackSDKReady = () => {
     if (existingReady) existingReady();
